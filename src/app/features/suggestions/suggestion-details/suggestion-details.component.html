@@ -1,0 +1,19 @@
+<div class="suggestion-details" *ngIf="suggestion">
+  <h2>Détails de la Suggestion</h2>
+  <div class="details-card">
+    <h3>{{ suggestion.title }}</h3>
+    <p class="description">{{ suggestion.description }}</p>
+    <div class="details-info">
+      <p><strong>Catégorie:</strong> {{ suggestion.category }}</p>
+      <p><strong>Date:</strong> {{ suggestion.date | date:'dd/MM/yyyy' }}</p>
+      <p><strong>Statut:</strong> {{ suggestion.status }}</p>
+      <p><strong>Nombre de likes:</strong> {{ suggestion.nbLikes }}</p>
+    </div>
+  </div>
+  <a routerLink="/suggestions" class="btn-back">← Retour à la liste</a>
+</div>
+
+<div class="not-found" *ngIf="!suggestion && suggestionId">
+  <p>Suggestion non trouvée</p>
+  <a routerLink="/suggestions" class="btn-back">← Retour à la liste</a>
+</div>

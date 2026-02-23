@@ -1,0 +1,50 @@
+﻿<form [formGroup]="suggestionForm" (ngSubmit)="onSubmit()">
+
+  <!-- Titre -->
+  <div>
+    <label>Titre :</label>
+    <input type="text" formControlName="title" />
+    <div *ngIf="title?.invalid && title?.touched">
+      <small *ngIf="title?.errors?.['required']">Le titre est obligatoire.</small>
+      <small *ngIf="title?.errors?.['minlength']">Le titre doit contenir au minimum 5 caractères.</small>
+      <small *ngIf="title?.errors?.['pattern']">Le titre doit commencer par une majuscule et ne contenir que des lettres.</small>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div>
+    <label>Description :</label>
+    <textarea formControlName="description"></textarea>
+    <div *ngIf="description?.invalid && description?.touched">
+      <small *ngIf="description?.errors?.['required']">La description est obligatoire.</small>
+      <small *ngIf="description?.errors?.['minlength']">La description doit contenir au minimum 30 caractères.</small>
+    </div>
+  </div>
+
+  <!-- Catégorie -->
+  <div>
+    <label>Catégorie :</label>
+    <select formControlName="category">
+      <option value="">-- Sélectionnez une catégorie --</option>
+      <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+    </select>
+    <div *ngIf="category?.invalid && category?.touched">
+      <small *ngIf="category?.errors?.['required']">La catégorie est obligatoire.</small>
+    </div>
+  </div>
+
+  <!-- Date (readonly) -->
+  <div>
+    <label>Date :</label>
+    <input type="text" formControlName="date" />
+  </div>
+
+  <!-- Status (readonly) -->
+  <div>
+    <label>Status :</label>
+    <input type="text" formControlName="status" />
+  </div>
+
+  <button type="submit" [disabled]="suggestionForm.invalid">Soumettre</button>
+
+</form>

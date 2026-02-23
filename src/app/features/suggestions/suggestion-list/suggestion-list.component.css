@@ -7,6 +7,30 @@
   margin-bottom: 20px;
 }
 
+.btn-add {
+  background-color: #667eea;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-add:hover {
+  background-color: #5568d3;
+  box-shadow: 0 3px 12px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-add:active {
+  transform: translateY(0);
+}
+
 .suggestions-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

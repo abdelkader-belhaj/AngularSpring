@@ -1,5 +1,8 @@
 <div class="suggestion-list">
   <h2>Liste des Suggestions</h2>
+  
+  <button (click)="goToAddForm()" class="btn-add">Ajouter une suggestion</button>
+  
   <div class="suggestions-container">
     <div *ngFor="let suggestion of suggestions" class="suggestion-card">
       <h3>{{ suggestion.title }}</h3>
@@ -9,6 +12,7 @@
         <span class="status">{{ suggestion.status }}</span>
         <span class="likes" (click)="likeSuggestion(suggestion)">👍 {{ suggestion.nbLikes }}</span>
       </div>
+
       <button [routerLink]="['/suggestions', suggestion.id]" class="btn-details">Détails</button>
     </div>
   </div>

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { Suggestion } from '../../../models/suggestion';
 
 @Component({
@@ -46,7 +47,21 @@ export class SuggestionListComponent {
     }
   ];
 
+  constructor(private router: Router) {
+    // Récupère les suggestions du router state si elles existent
+    const nav = this.router.getCurrentNavigation();
+    if (nav?.extras?.state && nav.extras.state['suggestions']) {
+      this.suggestions = nav.extras.state['suggestions'];
+    }
+  }
+
   likeSuggestion(suggestion: Suggestion): void {
     suggestion.nbLikes++;
+  }
+
+  goToAddForm(): void {
+    this.router.navigate(['/suggestions/add'], {
+      state: { suggestions: this.suggestions }
+    });
   }
 }

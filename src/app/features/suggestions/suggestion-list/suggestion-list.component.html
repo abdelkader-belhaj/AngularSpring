@@ -13,7 +13,10 @@
         <span class="likes" (click)="likeSuggestion(suggestion)">👍 {{ suggestion.nbLikes }}</span>
       </div>
 
-      <button [routerLink]="['/suggestions', suggestion.id]" class="btn-details">Détails</button>
+      <div class="btn-group">
+        <button [routerLink]="['/suggestions', suggestion.id]" class="btn-details">Détails</button>
+        <button (click)="deleteSuggestion(suggestion.id)" class="btn-delete">Supprimer</button>
+      </div>
     </div>
   </div>
 </div>

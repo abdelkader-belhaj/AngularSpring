@@ -1,67 +1,77 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Suggestion } from '../../../models/suggestion';
+import { SuggestionService } from '../../../core/Services/suggestion.service';
 
 @Component({
   selector: 'app-suggestion-list',
   templateUrl: './suggestion-list.component.html',
   styleUrl: './suggestion-list.component.css'
 })
-export class SuggestionListComponent {
-  suggestions: Suggestion[] = [
-    {
-      id: 1,
-      title: 'Organiser une journée team building',
-      description: 'Suggestion pour organiser une journée de team building pour renforcer les liens entre les membres de l\'équipe.',
-      category: 'Événements',
-      date: new Date('2025-01-20'),
-      status: 'acceptee',
-      nbLikes: 10
-    },
-    {
-      id: 2,
-      title: 'Améliorer le système de réservation',
-      description: 'Proposition pour améliorer la gestion des réservations en ligne avec un système de confirmation automatique.',
-      category: 'Technologie',
-      date: new Date('2025-01-15'),
-      status: 'refusee',
-      nbLikes: 0
-    },
-    {
-      id: 3,
-      title: 'Créer un système de récompenses',
-      description: 'Mise en place d\'un programme de récompenses pour motiver les employés et reconnaître leurs efforts.',
-      category: 'Ressources Humaines',
-      date: new Date('2025-01-25'),
-      status: 'refusee',
-      nbLikes: 0
-    },
-    {
-      id: 4,
-      title: 'Moderniser l\'interface utilisateur',
-      description: 'Refonte complète de l\'interface utilisateur pour une meilleure expérience utilisateur.',
-      category: 'Technologie',
-      date: new Date('2025-01-30'),
-      status: 'en_attente',
-      nbLikes: 0
-    }
-  ];
+export class SuggestionListComponent implements OnInit {
+  suggestions: Suggestion[] = [];
 
-  constructor(private router: Router) {
-    // Récupère les suggestions du router state si elles existent
-    const nav = this.router.getCurrentNavigation();
-    if (nav?.extras?.state && nav.extras.state['suggestions']) {
-      this.suggestions = nav.extras.state['suggestions'];
-    }
+  constructor(private router: Router, private suggestionService: SuggestionService) {}
+
+  ngOnInit(): void {
+    this.loadSuggestions();
+  }
+
+  loadSuggestions(): void {
+    this.suggestionService.getSuggestionsList().subscribe({
+      next: (data) => {
+        this.suggestions = data;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des suggestions:', err);
+      }
+    });
   }
 
   likeSuggestion(suggestion: Suggestion): void {
-    suggestion.nbLikes++;
+    console.log('Like clicked for suggestion:', suggestion.id, 'Current likes:', suggestion.nbLikes);
+    
+    // Créer un objet complet avec nbLikes incrémenté
+    const updatedSuggestion: any = {
+      id: suggestion.id,
+      title: suggestion.title,
+      description: suggestion.description,
+      category: suggestion.category,
+      status: suggestion.status,
+      nbLikes: (suggestion.nbLikes || 0) + 1,
+      date: suggestion.date
+    };
+    
+    console.log('Sending updated suggestion:', updatedSuggestion);
+    
+    // Mettre à jour avec PUT complet
+    this.suggestionService.updateSuggestion(suggestion.id, updatedSuggestion).subscribe({
+      next: (result) => {
+        console.log('Update successful:', result);
+        // Rafraîchir la liste pour être sûr
+        this.loadSuggestions();
+      },
+      error: (err) => {
+        console.error('Erreur lors de la mise à jour des likes:', err);
+        alert('Erreur: Cette suggestion n\'existe pas dans la base de données.');
+      }
+    });
+  }
+
+  deleteSuggestion(id: number): void {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette suggestion ?')) {
+      this.suggestionService.deleteSuggestion(id).subscribe({
+        next: () => {
+          this.loadSuggestions();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression:', err);
+        }
+      });
+    }
   }
 
   goToAddForm(): void {
-    this.router.navigate(['/suggestions/add'], {
-      state: { suggestions: this.suggestions }
-    });
+    this.router.navigate(['/suggestions/add']);
   }
 }

@@ -1,7 +1,8 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Suggestion } from '../../../models/suggestion';
+import { SuggestionService } from '../../../core/Services/suggestion.service';
 
 @Component({
   selector: 'app-suggestion-form',
@@ -11,7 +12,9 @@ import { Suggestion } from '../../../models/suggestion';
 export class SuggestionFormComponent implements OnInit {
 
   suggestionForm!: FormGroup;
-  suggestions: Suggestion[] = [];
+  id: number | null = null;
+  isEditMode: boolean = false;
+  suggestion: Suggestion | undefined;
 
   categories: string[] = [
     'Infrastructure et bâtiments',
@@ -26,12 +29,12 @@ export class SuggestionFormComponent implements OnInit {
     'Autre'
   ];
 
-  constructor(private fb: FormBuilder, private router: Router) {
-    const nav = this.router.getCurrentNavigation();
-    if (nav?.extras?.state) {
-      this.suggestions = nav.extras.state['suggestions'];
-    }
-  }
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private actR: ActivatedRoute,
+    private service: SuggestionService
+  ) {}
 
   ngOnInit(): void {
     this.suggestionForm = this.fb.group({
@@ -48,6 +51,22 @@ export class SuggestionFormComponent implements OnInit {
       date: [{ value: new Date().toLocaleDateString('fr-FR'), disabled: true }],
       status: [{ value: 'en attente', disabled: true }]
     });
+
+    // Vérifier si on est en mode édition
+    this.id = this.actR.snapshot.params['id'];
+    if (this.id) {
+      this.isEditMode = true;
+      this.service.getSuggestionById(this.id).subscribe((data) => {
+        this.suggestion = data;
+        this.suggestionForm.patchValue({
+          title: this.suggestion.title,
+          description: this.suggestion.description,
+          category: this.suggestion.category,
+          date: new Date(this.suggestion.date).toLocaleDateString('fr-FR'),
+          status: this.suggestion.status
+        });
+      });
+    }
   }
 
   get title() { return this.suggestionForm.get('title'); }
@@ -57,24 +76,36 @@ export class SuggestionFormComponent implements OnInit {
   onSubmit(): void {
     if (this.suggestionForm.invalid) return;
 
-    const newId = this.suggestions.length > 0
-      ? Math.max(...this.suggestions.map(s => s.id)) + 1
-      : 1;
-
-    const newSuggestion: Suggestion = {
-      id: newId,
+    const suggestionData: Suggestion = {
+      id: this.isEditMode && this.suggestion ? this.suggestion.id : 0,
       title: this.suggestionForm.value.title,
       description: this.suggestionForm.value.description,
       category: this.suggestionForm.value.category,
-      date: new Date(),
-      status: 'en attente',
-      nbLikes: 0
+      date: this.isEditMode && this.suggestion ? this.suggestion.date : new Date(),
+      status: this.isEditMode && this.suggestion ? this.suggestion.status : 'en attente',
+      nbLikes: this.isEditMode && this.suggestion ? this.suggestion.nbLikes : 0
     };
 
-    this.suggestions.push(newSuggestion);
-
-    this.router.navigate(['/suggestions'], {
-      state: { suggestions: this.suggestions }
-    });
+    if (this.isEditMode && this.id) {
+      // Mode modification
+      this.service.updateSuggestion(this.id, suggestionData).subscribe({
+        next: () => {
+          this.router.navigate(['/suggestions']);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la mise à jour:', err);
+        }
+      });
+    } else {
+      // Mode ajout
+      this.service.addSuggestion(suggestionData).subscribe({
+        next: () => {
+          this.router.navigate(['/suggestions']);
+        },
+        error: (err) => {
+          console.error('Erreur lors de l\'ajout:', err);
+        }
+      });
+    }
   }
 }

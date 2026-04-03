@@ -1,22 +1,26 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './core/home/home.component';
-import { ListSuggestionComponent } from './core/list-suggestion/list-suggestion.component';
-import { NotfoundComponent } from './core/notfound/notfound.component';
+import { HomePageComponent } from './homePage/home-page.component';
+import { DashbordPageComponent } from './dashbord/dashbord-page.component';
+import { adminGuard } from './guards/admin.guard';
+import { ResetPasswordComponent } from './homePage/reset-password/reset-password.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
-  { path: 'listSuggestion', component: ListSuggestionComponent },
-
-  { path: 'suggestions', loadChildren: () => import('./features/suggestions/suggestions.module').then(m => m.SuggestionsModule) },
-  { path: 'users', loadChildren: () => import('./features/users/users.module').then(m => m.UsersModule) },
-  
-  { path: '**', component: NotfoundComponent }
+  { path: '', component: HomePageComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'dashbord', component: DashbordPageComponent, canActivate: [adminGuard] },
+  { path: 'dashboard', component: DashbordPageComponent, canActivate: [adminGuard] },
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [
+    RouterModule.forRoot(routes, {
+      anchorScrolling: 'enabled',
+      scrollPositionRestoration: 'enabled',
+      scrollOffset: [0, 88]
+    })
+  ],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
